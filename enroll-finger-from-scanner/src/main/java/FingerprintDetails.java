@@ -1,6 +1,7 @@
 import lombok.*;
 
 @Value class FingerPrintDetails {
-    byte[] imageBytes;
-    byte[] templateBytes;
+    String imageBytes;
+    String templateBytes;
+    int nfiq;
 }

@@ -2,12 +2,16 @@ import static spark.Spark.*;
 import org.json.JSONObject;
 import java.util.Base64;
 import java.util.concurrent.*;
+import spark.Filter;
+import spark.Request;
+import spark.Response;
 
 public final class EnrollFingerFromScanner {
   public static void main(String[] args) {
 
     final EnrollFingerFromScannerBiometric enrollFromScanner;
-    
+
+
     try {
       enrollFromScanner = new EnrollFingerFromScannerBiometric();
     } catch (Exception e) {
@@ -16,6 +20,11 @@ public final class EnrollFingerFromScanner {
     }
     
     port(1212);
+    after((Filter) (request, response) -> {
+        response.header("Access-Control-Allow-Origin", "*");
+        response.header("Access-Control-Allow-Methods", "GET");
+    });
+
     post("/fingerprints", (req, res) -> {
       
       res.type("application/json");
@@ -29,8 +38,9 @@ public final class EnrollFingerFromScanner {
 
         jsonResponse 
           .put("data", new JSONObject()
-            .put("image", new String(fingerPrintDetails.getImageBytes()))
-            .put("template", new String(fingerPrintDetails.getTemplateBytes()))
+            .put("WSQImage", fingerPrintDetails.getTemplateBytes())
+            .put("BMPBase64", fingerPrintDetails.getImageBytes())
+            .put("NFIQ", fingerPrintDetails.getNfiq())
         );
 
       } catch (BScannerException e) {
@@ -67,22 +77,14 @@ public final class EnrollFingerFromScanner {
       
       Future<FingerPrintDetails> future = scanThread.start();
       
-      FingerPrintDetails fingerPrintDetails = future.get(3000, TimeUnit.MILLISECONDS);
+      FingerPrintDetails fingerPrintDetails = future.get(10000, TimeUnit.MILLISECONDS);
       // if internal exception
       if (fingerPrintDetails == null) {
         throw scanThread.getException();
       }
-
-      byte[] imageBytes = fingerPrintDetails.getImageBytes();
-      byte[] templateBytes = fingerPrintDetails.getTemplateBytes();
-
-      byte[] imageEncoded = Base64
-        .getEncoder()
-        .encode(imageBytes);
-      byte[] templateEncoded = Base64
-        .getEncoder()
-        .encode(templateBytes);
-
-      return new FingerPrintDetails(imageEncoded, templateEncoded);
+      return fingerPrintDetails;
+      // byte[] imageBytes = fingerPrintDetails.getImageBytes();
+      // byte[] templateBytes = fingerPrintDetails.getTemplateBytes();
+      // return new FingerPrintDetails(imageEncoded, templateEncoded);
   }
 }

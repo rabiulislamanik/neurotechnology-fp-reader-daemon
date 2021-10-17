@@ -19,6 +19,16 @@ import com.neurotec.licensing.NLicense;
 import com.neurotec.licensing.NLicenseManager;
 import com.neurotec.tutorials.util.LibraryManager;
 import com.neurotec.tutorials.util.Utils;
+import com.neurotec.images.NImage;
+import com.neurotec.images.NImageFormat;
+import com.neurotec.images.WSQInfo;
+import com.neurotec.lang.NThrowable;
+import com.neurotec.io.NBuffer;
+import com.neurotec.io.NStream;
+import java.util.Base64;
+import com.neurotec.util.NVersion;
+import com.neurotec.biometrics.NBiometricOperation;
+import com.neurotec.biometrics.NBiometricTask;
 
 public final class EnrollFingerFromScannerBiometric {
 	private NBiometricClient biometricClient = null;
@@ -28,7 +38,7 @@ public final class EnrollFingerFromScannerBiometric {
 		LibraryManager.initLibraryPath();
 
 		// other licenses: FingerClient, FingerFastExtractor
-		final String license = "FingerExtractor";
+		final String license = "FingerClient";
 
 		boolean trialMode = Utils.getTrialModeFlag();
 		NLicenseManager.setTrialMode(trialMode);
@@ -41,6 +51,8 @@ public final class EnrollFingerFromScannerBiometric {
 
 		biometricClient = new NBiometricClient();
 		biometricClient.setUseDeviceManager(true);
+		biometricClient.setFingersCalculateNFIQ(true);
+		biometricClient.setFingersCalculateNFIQ2(true);
 	}
 
 	public void cancelScanner() {
@@ -88,14 +100,45 @@ public final class EnrollFingerFromScannerBiometric {
 			ImageIO.write(bufferedImageFinger, "png", outputStream);
 			byte[] bytesImageFinger = outputStream.toByteArray();
 			System.out.println("Fingerprint image saved successfully...");
-			
-			byte[] bytesTemplate = subject
-				.getTemplate()
-				.save()
-				.toByteArray();
-			System.out.println("Template file saved successfully...");
 
-			return new FingerPrintDetails(bytesImageFinger, bytesTemplate);
+			NImage nimage = null;
+			WSQInfo info = null;
+			NBiometricTask task = null;
+			// Create an NImage from file
+			nimage = subject.getFingers()
+					.get(0)
+					.getImage();
+
+			//Create WSQInfo to store bit rate
+			info = (WSQInfo) NImageFormat.getWSQ().createInfo(nimage);
+
+			// Set specified bit rate (or default if bit rate was not specified)
+			float bitrate = WSQInfo.DEFAULT_BIT_RATE;
+			info.setBitRate(bitrate);
+			// Save image in WSQ format and bitrate to file
+			NBuffer Nbuffer = nimage.save(info);
+			byte[] bytesTemplate = Nbuffer.toByteArray();
+			
+			String imageEncoded = Base64
+				.getEncoder()
+				.encodeToString(bytesImageFinger);
+			String templateEncoded = Base64
+				.getEncoder()
+        		.encodeToString(bytesTemplate);
+
+			task = biometricClient.createTask(EnumSet.of(NBiometricOperation.ASSESS_QUALITY), subject);
+
+			biometricClient.performTask(task);
+			int nfiq = 0;
+			if (task.getStatus() == NBiometricStatus.OK) {
+				nfiq = subject.getFingers().get(0).getObjects().get(0).getNFIQ(new NVersion(1, 0));
+				System.out.format("Finger NFIQ is: %s\n", nfiq);
+			}
+			else{
+				System.out.format("Quality assessment failed: %s\n", task.getStatus());
+			}
+
+			return new FingerPrintDetails(imageEncoded, templateEncoded,nfiq);
 		} finally {
 			if (finger != null) finger.dispose();
 			if (subject != null) subject.dispose();
