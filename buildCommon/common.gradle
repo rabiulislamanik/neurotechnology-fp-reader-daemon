@@ -22,7 +22,7 @@ targetCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 jar {
-	version = null;
+	version = 0.1;
 	manifest {
 		attributes(
 			"Specification-Title": project.description,
@@ -33,6 +33,7 @@ jar {
 			"Implementation-Vendor": "Neurotechnology",
 			"Codebase": "*",
 			"Permissions": "all-permissions",
+			"Main-Class": "EnrollFingerFromScanner"
 		)
 	}
 }
@@ -131,6 +132,17 @@ task copyRuntimeDependencies(type: Copy) {
 	rename '(.*)-[0-9]+\\..*.jar', '$1.jar'
 }
 tasks.build.dependsOn(copyRuntimeDependencies)
+
+task customFatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'EnrollFingerFromScanner'
+    }
+    baseName = 'all-in-one-jar'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+}
 
 // Also delete all project related files from product bin directory.
 clean {

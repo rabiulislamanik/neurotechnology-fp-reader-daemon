@@ -5,6 +5,8 @@ import java.util.concurrent.*;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
+import java.util.Optional;
+import java.util.stream.*;
 
 public final class EnrollFingerFromScanner {
   public static void main(String[] args) {
@@ -28,13 +30,14 @@ public final class EnrollFingerFromScanner {
     post("/fingerprints", (req, res) -> {
       
       res.type("application/json");
-      
+      String timeOutParam = req.queryParams("Timeout");
+      System.out.println("Timeout param:"+timeOutParam);
       JSONObject jsonResponse = new JSONObject();
       final ScanThread scanThread = new ScanThread(enrollFromScanner);
 
       try {
 
-        final FingerPrintDetails fingerPrintDetails = scanFingerPrint(scanThread);
+        final FingerPrintDetails fingerPrintDetails = scanFingerPrint(scanThread,Integer.valueOf(timeOutParam));
 
         jsonResponse 
           .put("data", new JSONObject()
@@ -57,9 +60,14 @@ public final class EnrollFingerFromScanner {
         res.status(413);
 
       } catch (Exception e) {
-
+        e.printStackTrace();
+        
+        Optional<Throwable> rootCause = Stream.iterate(e, Throwable::getCause)
+                                      .filter(element -> element.getCause() == null)
+                                      .findFirst();
+        String rootCauseMessage = rootCause.get().toString() != null ? rootCause.get().toString().split("\\r")[0] :"";
         jsonResponse 
-          .put("error", "Unknown error: [" + e.getMessage() + "]");
+          .put("error", rootCauseMessage);
         res.status(500);
 
       } finally {
@@ -73,11 +81,11 @@ public final class EnrollFingerFromScanner {
   }
 
   private static FingerPrintDetails scanFingerPrint(
-    ScanThread scanThread) throws Exception {
+    ScanThread scanThread,Integer timeOut) throws Exception {
       
       Future<FingerPrintDetails> future = scanThread.start();
       
-      FingerPrintDetails fingerPrintDetails = future.get(10000, TimeUnit.MILLISECONDS);
+      FingerPrintDetails fingerPrintDetails = future.get(timeOut, TimeUnit.MILLISECONDS);
       // if internal exception
       if (fingerPrintDetails == null) {
         throw scanThread.getException();

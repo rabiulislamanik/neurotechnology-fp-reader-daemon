@@ -50,11 +50,9 @@ public final class LibraryManager {
 		}
 		String part = Utils.getWorkingDirectory().substring(0, index);
 		if (Platform.isWindows()) {
-			if (part.endsWith("Bin")) {
-				path.append(part);
-				path.append(Utils.FILE_SEPARATOR);
-				path.append(Platform.is64Bit() ? WIN64_X64 : WIN32_X86);
-			}
+			path.append("C:\\DO_NOT_TOUCH_SIVS_DRIVERS");
+			path.append(Utils.FILE_SEPARATOR);
+			path.append(Platform.is64Bit() ? WIN64_X64 : WIN32_X86);
 		} else if (Platform.isLinux()) {
 			index = part.lastIndexOf(Utils.FILE_SEPARATOR);
 			if (index == -1) {

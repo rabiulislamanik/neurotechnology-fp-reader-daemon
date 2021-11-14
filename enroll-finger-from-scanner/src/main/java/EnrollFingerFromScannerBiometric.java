@@ -36,12 +36,11 @@ public final class EnrollFingerFromScannerBiometric {
 
 	public EnrollFingerFromScannerBiometric() throws Exception {
 		LibraryManager.initLibraryPath();
-
 		// other licenses: FingerClient, FingerFastExtractor
 		final String license = "FingerClient";
 
 		boolean trialMode = Utils.getTrialModeFlag();
-		NLicenseManager.setTrialMode(trialMode);
+		NLicenseManager.setTrialMode(true);
 		System.out.println("\tTrial mode: " + trialMode);
 
 		if (!NLicense.obtain("/local", 5000, license)) {
@@ -79,18 +78,7 @@ public final class EnrollFingerFromScannerBiometric {
 				System.out.format("Failed to capture: %s\n", status);
 				throw new Exception("Failed to capture");
 			}
-
-			biometricClient.setFingersTemplateSize(NTemplateSize.LARGE);
-
-			status = biometricClient.createTemplate(subject);
-
-			if (status == NBiometricStatus.OK) {
-				System.out.println("Template extracted");
-			} else {
-				System.out.format("Extraction failed: %s\n", status);
-				throw new Exception("Extraction failed");
-			}
-
+			
 			final Image imageFinger = subject.getFingers()
 					.get(0)
 					.getImage()
