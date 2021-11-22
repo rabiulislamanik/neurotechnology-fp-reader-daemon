@@ -7,6 +7,9 @@ import spark.Request;
 import spark.Response;
 import java.util.Optional;
 import java.util.stream.*;
+import com.neurotec.licensing.NLicense;
+import com.neurotec.licensing.NLicenseManager;
+import java.io.File;
 
 public final class EnrollFingerFromScanner {
   public static void main(String[] args) {
@@ -37,14 +40,25 @@ public final class EnrollFingerFromScanner {
 
       try {
 
-        final FingerPrintDetails fingerPrintDetails = scanFingerPrint(scanThread,Integer.valueOf(timeOutParam));
+        final String license = "FingerClient";
 
-        jsonResponse 
-          .put("data", new JSONObject()
-            .put("WSQImage", fingerPrintDetails.getTemplateBytes())
-            .put("BMPBase64", fingerPrintDetails.getImageBytes())
-            .put("NFIQ", fingerPrintDetails.getNfiq())
-        );
+        if (!NLicense.obtain("/local", 5000, license)) {
+          System.err.format("Could not obtain license: %s%n", license);
+          jsonResponse 
+          .put("error", "No License");
+        }
+
+        else{
+          System.err.format("Obtained License for: %s%n", license);
+          final FingerPrintDetails fingerPrintDetails = scanFingerPrint(scanThread,Integer.valueOf(timeOutParam));
+
+          jsonResponse 
+            .put("data", new JSONObject()
+              .put("WSQImage", fingerPrintDetails.getTemplateBytes())
+              .put("BMPBase64", fingerPrintDetails.getImageBytes())
+              .put("NFIQ", fingerPrintDetails.getNfiq())
+          );
+        }
 
       } catch (BScannerException e) {
 
@@ -77,6 +91,13 @@ public final class EnrollFingerFromScanner {
       }
 
       return jsonResponse.toString();
+    });
+
+    
+    post("/startActivation", (req, res) -> {
+      Runtime.getRuntime().exec("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\ActivationWizard.exe", null, new File("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\"));
+      JSONObject json = new JSONObject().put("status","ok");
+      return json.toString();
     });
   }
 

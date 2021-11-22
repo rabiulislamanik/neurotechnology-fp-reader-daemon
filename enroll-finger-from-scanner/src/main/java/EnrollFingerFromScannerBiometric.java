@@ -40,13 +40,9 @@ public final class EnrollFingerFromScannerBiometric {
 		final String license = "FingerClient";
 
 		boolean trialMode = Utils.getTrialModeFlag();
-		NLicenseManager.setTrialMode(true);
+		NLicenseManager.setTrialMode(false);
 		System.out.println("\tTrial mode: " + trialMode);
-
-		if (!NLicense.obtain("/local", 5000, license)) {
-			System.err.format("Could not obtain license: %s%n", license);
-			throw new Exception("Failed to obtain licenses");
-		}
+	
 
 		biometricClient = new NBiometricClient();
 		biometricClient.setUseDeviceManager(true);
