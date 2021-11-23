@@ -99,3 +99,7 @@ The handled errors are:
 - Trying to read a fingerprint when there aren't devices available.
 - Trying to read a fingerprint when you are already reading another fingerprint.
 - Reading a fingerprint timed out, you took too long.
+
+## Packaging
+
+For packaging and distributing, check the packaging_readme.md in the packaging directory
