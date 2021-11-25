@@ -39,9 +39,7 @@ public final class EnrollFingerFromScannerBiometric {
 		// other licenses: FingerClient, FingerFastExtractor
 		final String license = "FingerClient";
 
-		boolean trialMode = Utils.getTrialModeFlag();
 		NLicenseManager.setTrialMode(false);
-		System.out.println("\tTrial mode: " + trialMode);
 	
 
 		biometricClient = new NBiometricClient();
