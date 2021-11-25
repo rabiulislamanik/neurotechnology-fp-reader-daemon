@@ -10,6 +10,9 @@ import java.util.stream.*;
 import com.neurotec.licensing.NLicense;
 import com.neurotec.licensing.NLicenseManager;
 import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public final class EnrollFingerFromScanner {
   public static void main(String[] args) {
@@ -24,7 +27,7 @@ public final class EnrollFingerFromScanner {
       return;
     }
     
-    port(1212);
+    port(1213);
     after((Filter) (request, response) -> {
         response.header("Access-Control-Allow-Origin", "*");
         response.header("Access-Control-Allow-Methods", "POST");
@@ -41,6 +44,25 @@ public final class EnrollFingerFromScanner {
       try {
 
         final String license = "FingerClient";
+
+        
+        if (!NLicense.obtain("/local", 5000, license)){
+          BufferedReader br = new BufferedReader(new FileReader("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\Licenses\\FingerClient_Windows.lic"));
+          try {
+              StringBuilder sb = new StringBuilder();
+              String line = br.readLine();
+  
+              while (line != null) {
+                  sb.append(line);
+                  sb.append(System.lineSeparator());
+                  line = br.readLine();
+              }
+              String licensestr = sb.toString();
+              NLicense.add(licensestr);
+          } finally {
+              br.close();
+          }
+        }
 
         if (!NLicense.obtain("/local", 5000, license)) {
           System.err.format("Could not obtain license: %s%n", license);
