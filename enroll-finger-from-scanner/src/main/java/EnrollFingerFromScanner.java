@@ -27,7 +27,7 @@ public final class EnrollFingerFromScanner {
       return;
     }
     
-    port(1213);
+    port(1212);
     after((Filter) (request, response) -> {
         response.header("Access-Control-Allow-Origin", "*");
         response.header("Access-Control-Allow-Methods", "POST");
@@ -47,20 +47,24 @@ public final class EnrollFingerFromScanner {
 
         
         if (!NLicense.obtain("/local", 5000, license)){
-          BufferedReader br = new BufferedReader(new FileReader("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\Licenses\\FingerClient_Windows.lic"));
-          try {
-              StringBuilder sb = new StringBuilder();
-              String line = br.readLine();
-  
-              while (line != null) {
-                  sb.append(line);
-                  sb.append(System.lineSeparator());
-                  line = br.readLine();
-              }
-              String licensestr = sb.toString();
-              NLicense.add(licensestr);
-          } finally {
-              br.close();
+          String licenseFilePath = "c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\Licenses\\FingerClient_Windows.lic";
+          File f = new File(licenseFilePath);
+          if(f.exists() && !f.isDirectory()) { 
+            BufferedReader br = new BufferedReader(new FileReader(licenseFilePath));
+            try {
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+    
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }
+                String licensestr = sb.toString();
+                NLicense.add(licensestr);
+            }finally {
+                br.close();
+            }
           }
         }
 
