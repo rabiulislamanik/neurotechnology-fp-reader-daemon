@@ -69,10 +69,15 @@ Source: "C:\Users\anik\Desktop\SIVS_DRIVERS\*"; DestDir: "{app}"; Flags: ignorev
 [Run]
 Filename: {app}\RealScan_Driver(x86)-V1.1.0.0.exe;WorkingDir: {app}; Check: (not IsWin64())  and (not FileExists(ExpandConstant('{sys}\drivers\RealScan.sys'))) ; Flags: 32bit;
 Filename: {app}\RealScan_Driver(x64)-V1.1.0.0.exe;WorkingDir: {app}; Check: (IsWin64()) and (not System32FileExists(ExpandConstant('{sys}\drivers\RealScan.sys'))); Flags: 64bit;
-//Filename: {app}\Win32_x86\Activation\ActivationWizard.exe;WorkingDir: {app};Check: not IsWin64(); Flags: 32bit;
-//Filename: {app}\Win64_x64\Activation\ActivationWizard.exe;WorkingDir: {app};Check: IsWin64(); Flags: 64bit;
-//Filename: "{cmd}"; Parameters: "/c ""sc.exe create FingerprintService binPath= {app}\sivs_webbridge.exe start= auto""" ;WorkingDir: {app};
-Filename: {sys}\sc.exe; Parameters: "create FingerprintService start= auto binPath= ""{app}\sivs_webbridge.exe""" ; Flags: runhidden
+Filename: {sys}\sc.exe; Parameters: "create FingerprintService start= auto binPath= ""{app}\sivs_webbridge.exe""" ; Flags: runhidden  ; StatusMsg: "Creating services"
 Filename: {sys}\sc.exe; Parameters: "start FingerprintService" ; Flags: runhidden
-//Filename: "{cmd}"; Parameters: "/c ""sc.exe start FingerprintService""" ;WorkingDir: {app};
+Filename: {app}\Win64_x64\Activation\ActivationWizard.exe;WorkingDir: {app}\Win64_x64\Activation;Check: IsWin64(); Flags: 64bit;
 
+
+[UninstallRun]
+Filename: {sys}\sc.exe; Parameters: "stop FingerprintService" ; Flags: runhidden
+Filename: {sys}\sc.exe; Parameters: "delete FingerprintService" ; Flags: runhidden
+
+[UninstallDelete]
+Type: files; Name: "{app}\*"; 
+Type: filesandordirs; Name: "{app}"

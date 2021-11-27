@@ -9,10 +9,8 @@ import java.util.Optional;
 import java.util.stream.*;
 import com.neurotec.licensing.NLicense;
 import com.neurotec.licensing.NLicenseManager;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.lang.ProcessBuilder;
 
 public final class EnrollFingerFromScanner {
   public static void main(String[] args) {
@@ -121,8 +119,14 @@ public final class EnrollFingerFromScanner {
 
     
     post("/startActivation", (req, res) -> {
-      Runtime.getRuntime().exec("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\ActivationWizard.exe", null, new File("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\"));
-      JSONObject json = new JSONObject().put("status","ok");
+      //ProcessBuilder pb = new ProcessBuilder();
+      // pb.command("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\ActivationWizard.exe");  
+      // pb.directory(new File("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation"));
+      // Process p = pb.start();
+      //Process p = Runtime.getRuntime().exec("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\ActivationWizard.exe", null, new File("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\"));
+      ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\ActivationWizard.exe");
+      pb.directory(new File("c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation"));
+      JSONObject json = new JSONObject().put("statusCode",pb.start().waitFor());
       return json.toString();
     });
   }
