@@ -67,8 +67,9 @@ Source: "C:\Users\anik\Desktop\SIVS_DRIVERS\*"; DestDir: "{app}"; Flags: ignorev
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Run]
-Filename: {app}\RealScan_Driver(x86)-V1.1.0.0.exe;WorkingDir: {app}; Check: (not IsWin64())  and (not FileExists(ExpandConstant('{sys}\drivers\RealScan.sys'))) ; Flags: 32bit;
-Filename: {app}\RealScan_Driver(x64)-V1.1.0.0.exe;WorkingDir: {app}; Check: (IsWin64()) and (not System32FileExists(ExpandConstant('{sys}\drivers\RealScan.sys'))); Flags: 64bit;
+//Filename: {app}\RealScan_Driver(x86)-V1.1.0.0.exe;WorkingDir: {app}; Check: (not IsWin64())  and (not FileExists(ExpandConstant('{sys}\drivers\RealScan.sys'))) ; Flags: 32bit;
+//Filename: {app}\RealScan_Driver(x64)-V1.1.0.0.exe;WorkingDir: {app}; Check: (IsWin64()) and (not System32FileExists(ExpandConstant('{sys}\drivers\RealScan.sys'))); Flags: 64bit;
+Filename: {app}\Futronic_Driver.exe;WorkingDir: {app}; Check: (IsWin64()) and (not DirExists(ExpandConstant('{commoncf32}\Futronic'))); Flags: 64bit;
 Filename: {sys}\sc.exe; Parameters: "create FingerprintService start= auto binPath= ""{app}\sivs_webbridge.exe""" ; Flags: runhidden  ; StatusMsg: "Creating services"
 Filename: {sys}\sc.exe; Parameters: "start FingerprintService" ; Flags: runhidden
 Filename: {app}\Win64_x64\Activation\ActivationWizard.exe;WorkingDir: {app}\Win64_x64\Activation;Check: IsWin64(); Flags: 64bit;
