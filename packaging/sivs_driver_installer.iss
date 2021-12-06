@@ -72,7 +72,7 @@ Source: "C:\Users\anik\Desktop\SIVS_DRIVERS\*"; DestDir: "{app}"; Flags: ignorev
 Filename: {app}\Futronic_Driver.exe;WorkingDir: {app}; Check: (IsWin64()) and (not DirExists(ExpandConstant('{commoncf32}\Futronic'))); Flags: 64bit;
 Filename: {sys}\sc.exe; Parameters: "create FingerprintService start= auto binPath= ""{app}\sivs_webbridge.exe""" ; Flags: runhidden  ; StatusMsg: "Creating services"
 Filename: {sys}\sc.exe; Parameters: "start FingerprintService" ; Flags: runhidden
-Filename: {app}\Win64_x64\Activation\ActivationWizard.exe;WorkingDir: {app}\Win64_x64\Activation;Check: IsWin64(); Flags: 64bit;
+//Filename: {app}\Win64_x64\Activation\ActivationWizard.exe;WorkingDir: {app}\Win64_x64\Activation;Check: IsWin64(); Flags: 64bit;
 
 
 [UninstallRun]
