@@ -74,6 +74,12 @@ Filename: {sys}\sc.exe; Parameters: "create FingerprintService start= auto binPa
 Filename: {sys}\sc.exe; Parameters: "start FingerprintService" ; Flags: runhidden
 //Filename: {app}\Win64_x64\Activation\ActivationWizard.exe;WorkingDir: {app}\Win64_x64\Activation;Check: IsWin64(); Flags: 64bit;
 
+ [Registry]
+    Root: HKCR; Subkey: "saws"; Flags: uninsdeletekey; ValueType: none; 
+    Root: HKCR; Subkey: "saws"; ValueType: string; ValueName: "URL Protocol"; ValueData: "";
+    Root: HKCR; Subkey: "saws\shell"; Flags: uninsdeletekey; ValueType: none
+    Root: HKCR; Subkey: "saws\shell\open"; Flags: uninsdeletekey; ValueType: none
+    Root: HKCR; Subkey: "saws\shell\open\command"; Flags: uninsdeletekey; ValueType: string; ValueName: ""; ValueData: "C:\DO_NOT_TOUCH_SIVS_DRIVERS\sivs_activation_wizard.bat";
 
 [UninstallRun]
 Filename: {sys}\sc.exe; Parameters: "stop FingerprintService" ; Flags: runhidden
