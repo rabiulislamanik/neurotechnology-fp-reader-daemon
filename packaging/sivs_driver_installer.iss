@@ -82,6 +82,7 @@ Filename: {sys}\sc.exe; Parameters: "start FingerprintService" ; Flags: runhidde
     Root: HKCR; Subkey: "saws\shell\open\command"; Flags: uninsdeletekey; ValueType: string; ValueName: ""; ValueData: "C:\DO_NOT_TOUCH_SIVS_DRIVERS\sivs_activation_wizard.bat";
 
 [UninstallRun]
+Filename: "{app}\sivs_uninstallation_wizard.bat"; Flags: runhidden
 Filename: {sys}\sc.exe; Parameters: "stop FingerprintService" ; Flags: runhidden
 Filename: {sys}\sc.exe; Parameters: "delete FingerprintService" ; Flags: runhidden
 
