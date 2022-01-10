@@ -24,10 +24,11 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\anik\Desktop
-OutputBaseFilename=sivs_driver_installer
+OutputBaseFilename=sivs_driver_installer_win7
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+MinVersion=6.0.6000
 
 
 
@@ -72,8 +73,8 @@ Source: "C:\Users\anik\Desktop\JRE_PACK\JRE_32\*"; DestDir: {app}\JRE; Check: no
 [Run]
 Filename: {app}\RealScan_Driver(x86)-V1.1.0.0.exe;WorkingDir: {app}; Check: (not IsWin64())  and (not FileExists(ExpandConstant('{sys}\drivers\RealScan.sys'))) ; Flags: 32bit;
 Filename: {app}\RealScan_Driver(x64)-V1.1.0.0.exe;WorkingDir: {app}; Check: (IsWin64()) and (not System32FileExists(ExpandConstant('{sys}\drivers\RealScan.sys'))); Flags: 64bit;
-//Filename: {app}\Futronic_Driver.exe;WorkingDir: {app}; Check: (IsWin64()) and (not DirExists(ExpandConstant('{commoncf32}\Futronic'))); Flags: 64bit; StatusMsg: "Installing futronic drivers in win8+_64bit mode"
-//Filename: {app}\Futronic_Driver.exe;WorkingDir: {app}; Check: (not IsWin64()) and (not DirExists(ExpandConstant('{commoncf32}\Futronic'))); Flags: 32bit; StatusMsg: "Installing futronic drivers in win8+_32bit mode"
+//Filename: {app}\Futronic_Driver_win7_vista.exe;WorkingDir: {app}; Check: (IsWin64()) and (not DirExists(ExpandConstant('{commoncf32}\Futronic'))); Flags: 64bit; StatusMsg: "Installing futronic drivers in win8-_64bit mode"
+//Filename: {app}\Futronic_Driver_win7_vista.exe;WorkingDir: {app}; Check: (not IsWin64()) and (not DirExists(ExpandConstant('{commoncf32}\Futronic'))); Flags: 32bit; StatusMsg: "Installing futronic drivers in win8-_32bit mode"
 Filename: {sys}\sc.exe; Parameters: "create FingerprintService start= auto binPath= ""{app}\sivs_webbridge.exe""" ; Flags: runhidden  ; StatusMsg: "Creating services"
 Filename: {sys}\sc.exe; Parameters: "start FingerprintService" ; Flags: runhidden
 
