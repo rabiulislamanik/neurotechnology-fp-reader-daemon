@@ -7,10 +7,24 @@ import spark.Request;
 import spark.Response;
 import java.util.Optional;
 import java.util.stream.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.neurotec.licensing.NLicense;
 import com.neurotec.licensing.NLicenseManager;
 import java.io.*;
 import java.lang.ProcessBuilder;
+import spark.utils.IOUtils;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import com.neurotec.images.NImage;
+import com.neurotec.images.NImageFormat;
+import com.neurotec.images.WSQInfo;
+import javax.imageio.ImageIO;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import com.neurotec.io.NBuffer;
 
 public final class EnrollFingerFromScanner {
   public static void main(String[] args) {
@@ -28,7 +42,20 @@ public final class EnrollFingerFromScanner {
     port(1212);
     after((Filter) (request, response) -> {
         response.header("Access-Control-Allow-Origin", "*");
-        response.header("Access-Control-Allow-Methods", "POST");
+        response.header("Access-Control-Allow-Methods", "GET,POST");
+    });
+
+
+    get("/ping" ,(req, res) -> {
+      return "ok";
+    });
+
+    post("/stopscan" ,(req, res) -> {
+      AtomicBoolean isScanGoingOn = enrollFromScanner.getCurrentWorking();
+      if(isScanGoingOn.get()){
+        enrollFromScanner.cancelScanner();
+      }
+      return "ok";
     });
 
     post("/fingerprints", (req, res) -> {
@@ -129,6 +156,61 @@ public final class EnrollFingerFromScanner {
       JSONObject json = new JSONObject().put("statusCode",pb.start().waitFor());
       return json.toString();
     });
+
+    post("/getWsqFromBmp", (req, res) -> {
+      res.type("application/json");
+      JSONObject jsonResponse = new JSONObject();
+      
+      initLicense();
+
+      final String license = "FingerClient";
+      if (!NLicense.obtain("/local", 5000, license)) {
+        System.err.format("Could not obtain license: %s%n", license);
+        jsonResponse 
+        .put("error", "No License");
+        return jsonResponse.toString();
+      }
+
+      req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("C:/tmp"));
+      Part filePart = req.raw().getPart("uploaded_file");
+
+      String WSQBase64;
+      try (InputStream inputStream = filePart.getInputStream()) {
+          OutputStream outputStream = new FileOutputStream("C:/tmp/" + filePart.getSubmittedFileName());
+          IOUtils.copy(inputStream, outputStream);
+          outputStream.close();
+
+          File file = new File("C:/tmp/" + filePart.getSubmittedFileName());
+          NImage nimage = NImage.fromFile("C:/tmp/" + filePart.getSubmittedFileName());
+          WSQInfo info = null;
+    
+          //Create WSQInfo to store bit rate
+          info = (WSQInfo) NImageFormat.getWSQ().createInfo(nimage);
+    
+          // Set specified bit rate (or default if bit rate was not specified)
+          float bitrate = WSQInfo.DEFAULT_BIT_RATE;
+          info.setBitRate(bitrate);
+          // Save image in WSQ format and bitrate to file
+          NBuffer Nbuffer = nimage.save(info);
+          byte[] bytesTemplate = Nbuffer.toByteArray();
+          
+          WSQBase64 = Base64
+            .getEncoder()
+                .encodeToString(bytesTemplate);
+
+          file.delete();
+
+          jsonResponse 
+            .put("WSQImage", WSQBase64);
+
+          return jsonResponse.toString();
+      }
+      catch(Exception e){
+        e.printStackTrace();
+      }
+
+      return "ok";
+    });
   }
 
   private static FingerPrintDetails scanFingerPrint(
@@ -145,5 +227,36 @@ public final class EnrollFingerFromScanner {
       // byte[] imageBytes = fingerPrintDetails.getImageBytes();
       // byte[] templateBytes = fingerPrintDetails.getTemplateBytes();
       // return new FingerPrintDetails(imageEncoded, templateEncoded);
+  }
+
+  public static void initLicense(){
+    final String license = "FingerClient";
+
+    try {
+      if (!NLicense.obtain("/local", 5000, license)){
+        String licenseFilePath = "c:\\DO_NOT_TOUCH_SIVS_DRIVERS\\Win64_x64\\Activation\\Licenses\\FingerClient_Windows.lic";
+        File f = new File(licenseFilePath);
+        if(f.exists() && !f.isDirectory()) { 
+          BufferedReader br = new BufferedReader(new FileReader(licenseFilePath));
+          try {
+              StringBuilder sb = new StringBuilder();
+              String line = br.readLine();
+  
+              while (line != null) {
+                  sb.append(line);
+                  sb.append(System.lineSeparator());
+                  line = br.readLine();
+              }
+              String licensestr = sb.toString();
+              NLicense.add(licensestr);
+          }finally {
+              br.close();
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  
   }
 }

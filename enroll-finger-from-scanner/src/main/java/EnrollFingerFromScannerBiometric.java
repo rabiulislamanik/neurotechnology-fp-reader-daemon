@@ -53,6 +53,10 @@ public final class EnrollFingerFromScannerBiometric {
 		currentWorking.set(false);
 	}
 
+	public AtomicBoolean getCurrentWorking(){
+		return currentWorking;
+	}
+
 	public FingerPrintDetails scanFingerPrint() throws Exception {
 		if ( ! currentWorking.compareAndSet(false, true)) {
 			throw new BScannerException("You are already trying to read a fingerprint, try after completing that one", 409);
@@ -127,6 +131,26 @@ public final class EnrollFingerFromScannerBiometric {
 			currentWorking.set(false);
 		}
 	}
+
+	// public String getWsqFromBMPFile(String filePath){
+	// 	File file = new File(filePath);
+	// 	NImage nimage = NImage.fromFile(filePath);
+	// 	WSQInfo info = null;
+  
+	// 	//Create WSQInfo to store bit rate
+	// 	info = (WSQInfo) NImageFormat.getWSQ().createInfo(nimage);
+  
+	// 	// Set specified bit rate (or default if bit rate was not specified)
+	// 	float bitrate = WSQInfo.DEFAULT_BIT_RATE;
+	// 	info.setBitRate(bitrate);
+	// 	// Save image in WSQ format and bitrate to file
+	// 	NBuffer Nbuffer = nimage.save(info);
+	// 	byte[] bytesTemplate = Nbuffer.toByteArray();
+		
+	// 	return Base64
+	// 	  .getEncoder()
+	// 		  .encodeToString(bytesTemplate);
+	// }
 
 	public static BufferedImage toBufferedImage(Image img) {
 		if (img instanceof BufferedImage) {
